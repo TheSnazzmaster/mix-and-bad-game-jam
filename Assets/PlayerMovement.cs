@@ -4,15 +4,59 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public float gravity = -0.1f;
+    public float jumpForce = 1f;
+
+    private BoxCollider2D collider;
+    private Rigidbody2D rb;
+    
+    public Vector2 vel = new Vector2(0, 0);
+    public Vector2 acc;
+
+    public bool onGround = false;
+    public bool wasOnGround = false;
     // Start is called before the first frame update
     void Start()
     {
-        
+        acc = new Vector2(0, gravity);
+        collider = GetComponent<BoxCollider2D>();
+        rb = GetComponent<Rigidbody2D>();
     }
+    private void FixedUpdate()
+    {
 
+        RaycastHit2D hit = Physics2D.Raycast(new Vector2(transform.position.x,transform.position.y - collider.bounds.extents.y), new Vector2(0,vel.y));
+        Debug.DrawRay(new Vector3(transform.position.x, transform.position.y - collider.bounds.extents.y), new Vector3(0, vel.y));
+        if (hit.distance < vel.magnitude)
+        {
+        }
+        Debug.Log(hit.distance + " help " + vel.magnitude);
+        if (!onGround&&wasOnGround)
+        {
+            acc.y = gravity;
+        }
+        if(onGround&&!wasOnGround)
+        {
+            acc.y = 0;
+            vel.y = 0;
+        }
+
+        transform.position += new Vector3(vel.x,vel.y);
+        vel += acc;
+        wasOnGround = onGround;
+    }
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetAxisRaw("Vertical") > 0.5 && onGround)
+        {
+            vel.y = jumpForce;
+            onGround = false;
+        }
+        rb.MovePosition(transform.position);
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        onGround = true;
     }
 }
